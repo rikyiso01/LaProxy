@@ -1,9 +1,9 @@
-from pyproxy import TCPProxy, NoTCPHandler, NoHTTPHandler, TCPHandler
+from pyproxy import TCPProxy, TCPHandler
 
 
 class Handler(TCPHandler):
     def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
-        if b"ciao" in packet:
+        if b"ciao" in packet and not inbound:
             return None
         return packet
 
