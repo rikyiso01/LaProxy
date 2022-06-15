@@ -2,6 +2,7 @@ from asyncio import StreamReader, StreamWriter, start_server, open_connection, g
 from ._pyproxy import Handler, Proxy
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from traceback import print_exc
 
 
 class TCPHandler(Handler, ABC):
@@ -65,6 +66,8 @@ class TCPProxy(Proxy):
     ) -> None:
         try:
             await handler.handle(reader, writer, inbound)
+        except:
+            print_exc()
         finally:
             writer.close()
             await writer.wait_closed()
