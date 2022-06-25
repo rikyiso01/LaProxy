@@ -66,11 +66,16 @@ class TCPProxy(Proxy):
     ) -> None:
         try:
             await handler.handle(reader, writer, inbound)
-        except:
-            print_exc()
+        except BaseException as e:
+            if not isinstance(e, GeneratorExit):
+                print_exc()
         finally:
-            writer.close()
-            await writer.wait_closed()
+            try:
+                writer.close()
+                await writer.wait_closed()
+            except BaseException as e:
+                if not isinstance(e, RuntimeError):
+                    print_exc()
 
 
 class NoTCPHandler(TCPHandler):

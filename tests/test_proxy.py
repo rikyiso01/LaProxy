@@ -4,11 +4,16 @@ from asyncio import CancelledError, Future, sleep, run, ensure_future
 
 
 async def check(future: Future[None], port: int) -> None:
-    await sleep(0.1)
     async with ClientSession() as session:
-        r = await session.get(f"http://127.0.0.1:{port}", allow_redirects=False)
-        assert "301 Moved" in await r.text()
-        assert r.status == 301
+        while True:
+            await sleep(0.1)
+            try:
+                r = await session.get(f"http://127.0.0.1:{port}", allow_redirects=False)
+            except:
+                continue
+            assert "301 Moved" in await r.text()
+            assert r.status == 301
+            break
     future.cancel()
     try:
         await future
