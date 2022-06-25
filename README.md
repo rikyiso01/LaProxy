@@ -53,7 +53,7 @@
 > version: "3.9"
 > services:
 >   proxy:
->     image: ghcr.io/rikyiso01/pyproxy:latest
+>     image: ghcr.io/rikyiso01/pyproxy:main
 >     ports:
 >       - "1234:1234"
 >     volumes:
