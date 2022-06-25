@@ -39,7 +39,7 @@ class TCPProxy(Proxy):
         self._target_port = target_port
         self._handler = handler
 
-    async def _run(self) -> None:
+    async def run_async(self) -> None:
         server = await start_server(
             self._thread, self._listen_address, self._listen_port
         )

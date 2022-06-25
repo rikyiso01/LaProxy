@@ -57,6 +57,6 @@
 >     ports:
 >       - "1234:1234"
 >     volumes:
->       - ./httpproxy.py:/app/httpproxy.py
->     command: python httpproxy.py
+>       - ./proxy.py:/app/proxy.py
+>     command: python proxy.py
 > ```

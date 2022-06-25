@@ -5,12 +5,12 @@ from abc import ABC, abstractmethod
 class Proxy:
     def run(self) -> None:
         try:
-            run(self._run())
+            run(self.run_async())
         except KeyboardInterrupt:
             pass
 
     @abstractmethod
-    async def _run(self) -> None:
+    async def run_async(self) -> None:
         ...
 
 
