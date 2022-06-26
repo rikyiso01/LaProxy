@@ -44,7 +44,7 @@
 > Install locally with:
 >
 > ```bash
-> pip install git+ssh://git@github.com/rikyiso01/pyproxy.git
+> pip install git+ssh://git@github.com/rikyiso01/pyproxy.git@latest
 > ```
 >
 > Or use it in a docker compose:
@@ -53,7 +53,7 @@
 > version: "3.9"
 > services:
 >   proxy:
->     image: ghcr.io/rikyiso01/pyproxy:main
+>     image: ghcr.io/rikyiso01/pyproxy:latest
 >     ports:
 >       - "1234:1234"
 >     volumes:
