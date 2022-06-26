@@ -7,9 +7,8 @@ name: Create and publish a Docker image
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io

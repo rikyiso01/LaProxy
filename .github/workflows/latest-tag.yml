@@ -5,9 +5,8 @@ name: Latest Tag
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
