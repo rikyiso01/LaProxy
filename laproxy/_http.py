@@ -1,7 +1,7 @@
 from __future__ import annotations
 from asyncio import StreamReader, StreamWriter
 from abc import ABC, abstractmethod
-from ._pyproxy import Handler
+from ._laproxy import Handler
 
 
 class HTTPPayload:

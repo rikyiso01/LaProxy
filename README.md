@@ -1,4 +1,4 @@
-# PyProxy
+# LaProxy
 
 ## Introduction
 
@@ -9,7 +9,7 @@
 > ### TCP
 >
 > ```python
-> from pyproxy import TCPProxy, TCPHandler
+> from laproxy import TCPProxy, TCPHandler
 > 
 > class Handler(TCPHandler):
 >     def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
@@ -23,7 +23,7 @@
 > ### HTTP
 >
 > ```python
-> from pyproxy import TCPProxy, HTTPHandler, HTTPRequest, HTTPResponse
+> from laproxy import TCPProxy, HTTPHandler, HTTPRequest, HTTPResponse
 > 
 > class Handler(HTTPHandler):
 >     def request(self, request: HTTPRequest, /) -> HTTPRequest | None:
@@ -44,7 +44,7 @@
 > Install locally with:
 >
 > ```bash
-> pip install git+ssh://git@github.com/rikyiso01/pyproxy.git@latest
+> pip install git+ssh://git@github.com/rikyiso01/laproxy.git@latest
 > ```
 >
 > Or use it in a docker compose:
@@ -53,7 +53,7 @@
 > version: "3.9"
 > services:
 >   proxy:
->     image: ghcr.io/rikyiso01/pyproxy:latest
+>     image: ghcr.io/rikyiso01/laproxy:latest
 >     ports:
 >       - "1234:1234"
 >     volumes:

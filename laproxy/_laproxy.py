@@ -1,3 +1,4 @@
+from __future__ import annotations
 from asyncio import run, StreamWriter, StreamReader
 from abc import ABC, abstractmethod
 

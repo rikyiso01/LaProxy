@@ -1,4 +1,5 @@
-from ._pyproxy import Proxy, Handler
+from __future__ import annotations
+from ._laproxy import Proxy, Handler
 from ._tcp import TCPProxy, TCPHandler, NoTCPHandler
 from ._http import HTTPHandler, HTTPPayload, HTTPResponse, HTTPRequest, NoHTTPHandler
 

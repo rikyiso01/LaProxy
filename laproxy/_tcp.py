@@ -1,5 +1,6 @@
+from __future__ import annotations
 from asyncio import StreamReader, StreamWriter, start_server, open_connection, gather
-from ._pyproxy import Handler, Proxy
+from ._laproxy import Handler, Proxy
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from traceback import print_exc

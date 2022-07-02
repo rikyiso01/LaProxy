@@ -1,4 +1,5 @@
-from pyproxy import TCPProxy, NoTCPHandler, NoHTTPHandler
+from __future__ import annotations
+from laproxy import TCPProxy, NoTCPHandler, NoHTTPHandler
 from aiohttp import ClientSession
 from asyncio import CancelledError, Future, sleep, run, ensure_future
 

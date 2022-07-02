@@ -1,4 +1,4 @@
-from pyproxy import TCPProxy, HTTPHandler, HTTPRequest, HTTPResponse
+from laproxy import TCPProxy, HTTPHandler, HTTPRequest, HTTPResponse
 
 
 class Handler(HTTPHandler):
@@ -10,5 +10,5 @@ class Handler(HTTPHandler):
             return None
         return response
 
-
-TCPProxy("0.0.0.0", 1234, "www.google.com", 80, Handler).run()
+if __name__=='__main__':
+    TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()

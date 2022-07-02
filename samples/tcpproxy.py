@@ -1,4 +1,4 @@
-from pyproxy import TCPProxy, TCPHandler
+from laproxy import TCPProxy, TCPHandler
 
 
 class Handler(TCPHandler):
@@ -8,4 +8,5 @@ class Handler(TCPHandler):
         return packet
 
 
-TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
+if __name__ == "__main__":
+    TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
