@@ -2,7 +2,7 @@
 
 ## Introduction
 
-> A fast way to create proxies
+> An easy to use proxy
 
 ## Code Samples
 
@@ -11,19 +11,23 @@
 > ```python
 > from laproxy import TCPProxy, TCPHandler
 > 
+> 
 > class Handler(TCPHandler):
 >     def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
 >         if b"ciao" in packet and not inbound:
 >             return None
 >         return packet
 > 
-> TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
+> 
+> if __name__ == "__main__":
+>     TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
 > ```
 >
 > ### HTTP
 >
 > ```python
 > from laproxy import TCPProxy, HTTPHandler, HTTPRequest, HTTPResponse
+> 
 > 
 > class Handler(HTTPHandler):
 >     def request(self, request: HTTPRequest, /) -> HTTPRequest | None:
@@ -34,17 +38,17 @@
 >             return None
 >         return response
 > 
-> TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
+> if __name__=='__main__':
+>     TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
 > ```
 >
-> 
 
 ## Installation
 
 > Install locally with:
 >
 > ```bash
-> pip install git+ssh://git@github.com/rikyiso01/laproxy.git@latest
+> python3pip install laproxy
 > ```
 >
 > Or use it in a docker compose:
