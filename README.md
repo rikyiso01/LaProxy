@@ -2,7 +2,7 @@
 
 ## Introduction
 
-> An easy to use proxy
+> An easy to use proxy for A/D
 
 ## Code Samples
 
@@ -48,7 +48,7 @@
 > Install locally with:
 >
 > ```bash
-> python3pip install laproxy
+> python3 -m pip install laproxy
 > ```
 >
 > Or use it in a docker compose:
