@@ -31,6 +31,7 @@ timeout = 5
 legacy_tox_ini = """
 [tox]
 envlist = py38,py310
+isolated_build=true
 
 [gh-actions]
 python =
