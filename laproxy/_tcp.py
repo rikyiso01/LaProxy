@@ -1,17 +1,32 @@
 from __future__ import annotations
-from asyncio import StreamReader, StreamWriter, start_server, open_connection, gather
+from asyncio import (
+    StreamReader,
+    StreamWriter,
+    start_server,
+    open_connection,
+)
 from ._laproxy import Handler, Proxy
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+from aiotools import TaskGroup  # type: ignore
+from typing import TYPE_CHECKING
 from traceback import print_exc
+
+if TYPE_CHECKING:
+    from asyncio import TaskGroup as TG
+
+DEFAULT_TCP_BUFFSIZE = 1024
 
 
 class TCPHandler(Handler, ABC):
+    def buffsize(self) -> int:
+        return DEFAULT_TCP_BUFFSIZE
+
     async def handle(
         self, reader: StreamReader, writer: StreamWriter, inbound: bool, /
     ) -> None:
         while True:
-            packet = await reader.read(1024)
+            packet = await reader.read(self.buffsize())
             if not packet:
                 break
             packet = self.process(packet, inbound)
@@ -48,14 +63,25 @@ class TCPProxy(Proxy):
             await server.serve_forever()
 
     async def _thread(self, reader: StreamReader, writer: StreamWriter, /) -> None:
-        target_reader, target_writer = await open_connection(
-            self._target_address, self._target_port
-        )
-        handler = self._handler()
-        await gather(
-            self._handle(handler, reader, target_writer, True),
-            self._handle(handler, target_reader, writer, False),
-        )
+        try:
+            target_reader, target_writer = await open_connection(
+                self._target_address, self._target_port
+            )
+            handler = self._handler()
+            group: TG
+            async with TaskGroup() as group:  # type: ignore
+                group.create_task(
+                    self._handle(handler, reader, target_writer, True),
+                    name="tcp inbound",
+                )
+                group.create_task(
+                    self._handle(handler, target_reader, writer, False),
+                    name="tcp outbound",
+                )
+        except GeneratorExit:
+            pass
+        except:
+            print_exc()
 
     async def _handle(
         self,
@@ -67,16 +93,9 @@ class TCPProxy(Proxy):
     ) -> None:
         try:
             await handler.handle(reader, writer, inbound)
-        except BaseException as e:
-            if not isinstance(e, GeneratorExit):
-                print_exc()
         finally:
-            try:
-                writer.close()
-                await writer.wait_closed()
-            except BaseException as e:
-                if not isinstance(e, RuntimeError):
-                    print_exc()
+            writer.close()
+            await writer.wait_closed()
 
 
 class NoTCPHandler(TCPHandler):

@@ -11,5 +11,6 @@ class Handler(HTTPHandler):
             return None
         return response
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
     TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()

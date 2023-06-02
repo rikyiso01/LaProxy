@@ -2,127 +2,133 @@ from __future__ import annotations
 from asyncio import StreamReader, StreamWriter
 from abc import ABC, abstractmethod
 from ._laproxy import Handler
+from dataclasses import dataclass
+from collections import UserDict
+from re import compile
+
+HEADER_RE = compile(r"([^:]+):\s+(.+)")
+REQUEST_LINE_RE = compile(r"(\w+)\s+(.+)\s+HTTP\/(\d\.\d)")
+RESPONSE_LINE_RE = compile(r"HTTP\/(\d\.\d)\s+(\d+)\s+(.+)")
 
 
-class HTTPPayload:
+class MalformedHeaderException(Exception):
+    ...
+
+
+class MalformedRequestLineException(Exception):
+    ...
+
+
+class MalformedResponseLineException(Exception):
+    ...
+
+
+class HTTPHeaders(UserDict[str, str]):
     @staticmethod
-    async def parse_headers(reader: StreamReader, /) -> dict[str, str]:
-        result: dict[str, str] = {}
+    async def parse_headers(reader: StreamReader, /) -> HTTPHeaders:
+        result = HTTPHeaders()
         while True:
-            line = (await reader.readline()).strip()
+            line = (await reader.readline()).strip().decode()
             if not line:
                 break
-            key, value = line.decode().split(": ")
+            match = HEADER_RE.match(line)
+            if match is None:
+                raise MalformedHeaderException(line)
+            key = match.group(1)
+            value = match.group(2)
             result[key] = value
         return result
 
+    def __getitem__(self, item: str) -> str:
+        return self.data[item.lower()]
+
+    def __setitem__(self, item: str, value: str) -> None:
+        self.data[item.lower()] = value
+
+
+@dataclass
+class HTTPPayload:
     @staticmethod
     async def parse_body(reader: StreamReader, n: int, /) -> bytes:
         return await reader.readexactly(n)
 
     @staticmethod
     async def parse_payload(reader: StreamReader, /) -> HTTPPayload:
-        headers = await HTTPPayload.parse_headers(reader)
+        headers = await HTTPHeaders.parse_headers(reader)
         body = b""
-        if "Content-Length" in headers:
+        if "content-length" in headers:
             body = await HTTPPayload.parse_body(reader, int(headers["Content-Length"]))
         return HTTPPayload(headers, body)
 
-    def __init__(self, headers: dict[str, str], body: bytes, /):
-        self._headers = headers
-        self._body = body
-
-    @property
-    def body(self) -> bytes:
-        return self._body
-
-    def __getitem__(self, item: str, /) -> str:
-        return self._headers[item]
-
-    def headers(self) -> dict[str, str]:
-        return self._headers.copy()
+    headers: HTTPHeaders
+    body: bytes
 
     def __bytes__(self) -> bytes:
         result = bytearray()
-        for key, value in self._headers.items():
+        for key, value in self.headers.items():
             result.extend(f"{key}: {value}\r\n".encode())
         result.extend(b"\r\n")
-        if self._body:
-            result.extend(self._body)
+        if self.body:
+            result.extend(self.body)
         return bytes(result)
 
 
+@dataclass
 class HTTPRequest(HTTPPayload):
     @staticmethod
     async def parse_request(reader: StreamReader, /) -> HTTPRequest | None:
-        line = await reader.readline()
+        line = (await reader.readline()).decode().strip()
         if not line:
             return None
-        method, path, version = line.strip().decode().split(" ")
-        return HTTPRequest(
-            method, path, version, await HTTPPayload.parse_payload(reader)
-        )
+        match = REQUEST_LINE_RE.match(line)
+        if match is None:
+            raise MalformedRequestLineException(line)
+        method = match.group(1)
+        path = match.group(2)
+        version = float(match.group(3))
+        payload = await HTTPPayload.parse_payload(reader)
+        return HTTPRequest(payload.headers, payload.body, method, path, version)
 
-    def __init__(self, method: str, path: str, version: str, payload: HTTPPayload, /):
-        super().__init__(payload.headers(), payload.body)
-        self._version = version
-        self._method = method
-        self._path = path
-
-    @property
-    def version(self) -> str:
-        return self._version
-
-    @property
-    def method(self) -> str:
-        return self._method
-
-    @property
-    def path(self) -> str:
-        return self._path
+    method: str
+    path: str
+    version: float
 
     def __bytes__(self) -> bytes:
         return (
-            f"{self._method} {self._path} {self._version}\r\n".encode()
+            f"{self.method} {self.path} HTTP/{self.version}\r\n".encode()
             + super().__bytes__()
         )
 
 
+@dataclass
 class HTTPResponse(HTTPPayload):
     @staticmethod
     async def parse_response(reader: StreamReader, /) -> HTTPResponse | None:
-        line = await reader.readline()
+        line = (await reader.readline()).decode().strip()
         if not line:
             return None
-        version, code, *message = line.strip().decode().split(" ")
+        match = RESPONSE_LINE_RE.match(line)
+        if not match:
+            raise MalformedResponseLineException(line)
+        version = match.group(1)
+        code = match.group(2)
+        message = match.group(3)
+        payload = await HTTPPayload.parse_payload(reader)
         return HTTPResponse(
-            version,
+            payload.headers,
+            payload.body,
+            float(version),
             int(code),
-            " ".join(message),
-            await HTTPPayload.parse_payload(reader),
+            message,
         )
 
-    def __init__(self, version: str, code: int, message: str, payload: HTTPPayload, /):
-        super().__init__(payload.headers(), payload.body)
-        self._version = version
-        self._code = code
-        self._message = message
-
-    @property
-    def version(self) -> str:
-        return self._version
-
-    @property
-    def code(self) -> int:
-        return self._code
-
-    @property
-    def message(self) -> str:
-        return self._message
+    version: float
+    code: int
+    message: str
 
     def __bytes__(self) -> bytes:
         return (
-            f"{self._version} {self._code} {self._message}\r\n".encode()
+            f"HTTP/{self.version} {self.code} {self.message}\r\n".encode()
             + super().__bytes__()
         )
 
