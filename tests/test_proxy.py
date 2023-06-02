@@ -1,9 +1,13 @@
 from __future__ import annotations
 from laproxy import TCPProxy, NoTCPHandler, NoHTTPHandler
-from httpx import AsyncClient
-from asyncio import sleep, run, Task
+from httpx import AsyncClient, get
+from asyncio import sleep as asleep, run, Task
 from aiotools import TaskGroup  # type: ignore
 from typing import TYPE_CHECKING
+from sys import executable
+from os import environ
+from subprocess import Popen, check_call
+from time import sleep
 
 if TYPE_CHECKING:
     from asyncio import TaskGroup as TG
@@ -11,11 +15,25 @@ if TYPE_CHECKING:
 
 async def check(task: Task[None], port: int) -> None:
     async with AsyncClient() as session:
-        await sleep(0.1)
+        await asleep(0.1)
         r = await session.get(f"http://127.0.0.1:{port}", follow_redirects=False)
         assert "301 Moved" in r.text
         assert r.status_code == 301
     task.cancel()
+
+
+def check_http(port: int) -> None:
+    sleep(0.5)
+    r = get(f"http://127.0.0.1:{port}", follow_redirects=False)
+    assert "301 Moved" in r.text
+    assert r.status_code == 301
+
+
+def check_sample(path: str, port: int) -> None:
+    process = Popen([executable, path], env={**environ, "PYTHONPATH": "."})
+    check_http(port)
+    process.terminate()
+    process.wait()
 
 
 async def test_tcp():
@@ -48,6 +66,23 @@ async def test_http():
             name="proxy",
         )
         group.create_task(check(task, 1235), name="client")
+
+
+def test_httpsample():
+    check_sample("samples/httpproxy.py", 8080)
+
+
+def test_tcpsample():
+    check_sample("samples/tcpproxy.py", 5000)
+
+
+def test_docker():
+    check_call(["docker", "compose", "-f", "tests/docker-compose.yml", "down"])
+    check_call(
+        ["docker", "compose", "-f", "tests/docker-compose.yml", "up", "--build", "-d"]
+    )
+    check_http(1236)
+    check_call(["docker", "compose", "-f", "tests/docker-compose.yml", "down"])
 
 
 if __name__ == "__main__":

@@ -6,4 +6,3 @@ services:
       - "1234:1234"
     volumes:
       - ./proxy.py:/app/proxy.py
-    command: python proxy.py

@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  proxy:
+    build:
+      dockerfile: ./Dockerfile
+      context: ../
+    ports:
+      - "1236:8080"
+    volumes:
+      - ../samples/httpproxy.py:/app/proxy.py

@@ -8,4 +8,5 @@ RUN pip install --no-cache-dir .
 
 WORKDIR '/app'
 
-CMD ["/bin/bash"]
+ENTRYPOINT [ "python3" ]
+CMD ["proxy.py"]

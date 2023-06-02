@@ -10,4 +10,4 @@ class Handler(TCPHandler):
 
 
 if __name__ == "__main__":
-    TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
+    TCPProxy("0.0.0.0", 5000, "www.google.com", 80, Handler).run()
