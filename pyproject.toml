@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "laproxy"
-version = "1.0.3"
+version = "1.0.2"
 description = "An easy proxy to setup"
 authors = ["Riccardo Isola <riky.isola@gmail.com>"]
 
