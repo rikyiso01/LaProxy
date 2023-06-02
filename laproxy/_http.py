@@ -5,6 +5,10 @@ from ._laproxy import Handler
 from dataclasses import dataclass
 from collections import UserDict
 from re import compile
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    UserDict = UserDict[str, str]
 
 HEADER_RE = compile(r"([^:]+):\s+(.+)")
 REQUEST_LINE_RE = compile(r"(\w+)\s+(.+)\s+HTTP\/(\d\.\d)")
@@ -23,7 +27,7 @@ class MalformedResponseLineException(Exception):
     ...
 
 
-class HTTPHeaders(UserDict[str, str]):
+class HTTPHeaders(UserDict):
     @staticmethod
     async def parse_headers(reader: StreamReader, /) -> HTTPHeaders:
         result = HTTPHeaders()
