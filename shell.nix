@@ -7,15 +7,18 @@ pkgs.mkShell {
     docker-compose
   ];
 
-  DOCKER_HOST = "unix:///tmp/podman.sock";
-
   shellHook = ''
     poetry env use python3.8
     poetry install
-    if [ ! -S /tmp/podman.sock ]
+    if [ -z $DOCKER_HOST ]
     then
-      echo Spawning podman process
-      ${pkgs.podman}/bin/podman system service --time=0 $DOCKER_HOST &
+      echo 'Missing DOCKER_HOST environment variable'
+      export DOCKER_HOST='unix:///tmp/podman.sock'
+      if [ ! -S /tmp/podman.sock ]
+      then
+        echo 'Spawning podman process'
+        ${pkgs.podman}/bin/podman system service --time=0 $DOCKER_HOST &
+      fi
     fi
   '';
 }
