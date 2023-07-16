@@ -1,16 +1,11 @@
 from __future__ import annotations
 from laproxy import TCPProxy, NoTCPHandler, NoHTTPHandler
-from httpx import AsyncClient, get
+from httpx import AsyncClient, get, ConnectError
 from asyncio import sleep as asleep, run, Task
-from aiotools import TaskGroup  # type: ignore
-from typing import TYPE_CHECKING
+from aiotools import TaskGroup
 from sys import executable
 from os import environ
 from subprocess import Popen, check_call
-from time import sleep
-
-if TYPE_CHECKING:
-    from asyncio import TaskGroup as TG
 
 
 async def check(task: Task[None], port: int) -> None:
@@ -23,8 +18,12 @@ async def check(task: Task[None], port: int) -> None:
 
 
 def check_http(port: int) -> None:
-    sleep(0.5)
-    r = get(f"http://127.0.0.1:{port}", follow_redirects=False)
+    while True:
+        try:
+            r = get(f"http://127.0.0.1:{port}", follow_redirects=False)
+            break
+        except ConnectError:
+            pass
     assert "301 Moved" in r.text
     assert r.status_code == 301
 
@@ -37,8 +36,7 @@ def check_sample(path: str, port: int) -> None:
 
 
 async def test_tcp():
-    group: TG
-    async with TaskGroup() as group:  # type: ignore
+    async with TaskGroup() as group:
         task = group.create_task(
             TCPProxy(
                 "0.0.0.0",
@@ -53,8 +51,7 @@ async def test_tcp():
 
 
 async def test_http():
-    group: TG
-    async with TaskGroup() as group:  # type: ignore
+    async with TaskGroup() as group:
         task = group.create_task(
             TCPProxy(
                 "0.0.0.0",
@@ -74,6 +71,10 @@ def test_httpsample():
 
 def test_tcpsample():
     check_sample("samples/tcpproxy.py", 5000)
+
+
+def test_tcplinesample():
+    check_sample("samples/tcplineproxy.py", 5001)
 
 
 def test_docker():

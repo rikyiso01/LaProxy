@@ -8,12 +8,9 @@ from asyncio import (
 from ._laproxy import Handler, Proxy
 from abc import ABC, abstractmethod
 from collections.abc import Callable
-from aiotools import TaskGroup  # type: ignore
-from typing import TYPE_CHECKING
 from traceback import print_exc
 
-if TYPE_CHECKING:
-    from asyncio import TaskGroup as TG
+from aiotools import TaskGroup
 
 DEFAULT_TCP_BUFFSIZE = 1024
 
@@ -36,6 +33,30 @@ class TCPHandler(Handler, ABC):
 
     @abstractmethod
     def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
+        ...
+
+
+class TCPLineHandler(TCPHandler):
+    def __init__(self):
+        super().__init__()
+        self.__inbound_buffer = bytearray()
+        self.__outbound_buffer = bytearray()
+
+    def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
+        buffer = self.__inbound_buffer if inbound else self.__outbound_buffer
+        buffer.extend(packet)
+        response = bytearray()
+        while (index := buffer.find(b"\n")) != -1:
+            content = buffer[: index + 1]
+            del buffer[: index + 1]
+            new = self.process_line(content, inbound)
+            if new is None:
+                return None
+            response.extend(new)
+        return response
+
+    @abstractmethod
+    def process_line(self, line: bytes, inbound: bool, /) -> bytes | None:
         ...
 
 
@@ -68,8 +89,7 @@ class TCPProxy(Proxy):
                 self._target_address, self._target_port
             )
             handler = self._handler()
-            group: TG
-            async with TaskGroup() as group:  # type: ignore
+            async with TaskGroup() as group:
                 group.create_task(
                     self._handle(handler, reader, target_writer, True),
                     name="tcp inbound",
