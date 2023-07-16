@@ -1,11 +1,12 @@
 from __future__ import annotations
 from laproxy import TCPProxy, NoTCPHandler, NoHTTPHandler
-from httpx import AsyncClient, get, ConnectError
+from httpx import AsyncClient, get
 from asyncio import sleep as asleep, run, Task
 from aiotools import TaskGroup
 from sys import executable
 from os import environ
 from subprocess import Popen, check_call
+from time import sleep
 
 
 async def check(task: Task[None], port: int) -> None:
@@ -18,12 +19,8 @@ async def check(task: Task[None], port: int) -> None:
 
 
 def check_http(port: int) -> None:
-    while True:
-        try:
-            r = get(f"http://127.0.0.1:{port}", follow_redirects=False)
-            break
-        except ConnectError:
-            pass
+    sleep(1)
+    r = get(f"http://127.0.0.1:{port}", follow_redirects=False)
     assert "301 Moved" in r.text
     assert r.status_code == 301
 
