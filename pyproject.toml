@@ -6,7 +6,7 @@ authors = ["Riccardo Isola <riky.isola@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/rikyiso01/LaProxy"
-documentation = "https://rikyiso01.github.io/laproxy"
+documentation = "https://rikyiso01.github.io/LaProxy"
 keywords = ["proxy", "ctf-tools", "attack-defense-ctf"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
