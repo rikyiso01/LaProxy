@@ -1,8 +1,23 @@
 [tool.poetry]
 name = "laproxy"
-version = "1.0.2"
-description = "An easy proxy to setup"
+version = "1.1.0"
+description = "An easy to use proxy for A/D CTFs"
 authors = ["Riccardo Isola <riky.isola@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/rikyiso01/LaProxy"
+documentation = "https://rikyiso01.github.io/laproxy"
+keywords = ["proxy", "ctf-tools", "attack-defense-ctf"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Internet :: Proxy Servers",
+    "Typing :: Typed",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
