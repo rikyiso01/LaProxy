@@ -3,12 +3,12 @@ from asyncio import StreamReader, StreamWriter
 from abc import ABC, abstractmethod
 from laproxy._laproxy import Handler
 from laproxy._tcp import get_remote_host
-from dataclasses import dataclass
 from collections import UserDict
 from re import compile
 from typing import TYPE_CHECKING, final
 from typing_extensions import override
 from logging import getLogger
+from attrs import define
 
 if TYPE_CHECKING:
     UserDict = UserDict[str, str]
@@ -74,7 +74,7 @@ class HTTPHeaders(UserDict):
         return key.lower() in self.data
 
 
-@dataclass
+@define
 class HTTPPayload:
     """Common fields of an http request and response"""
 
@@ -120,7 +120,7 @@ class HTTPPayload:
         return bytes(result)
 
 
-@dataclass
+@define
 class HTTPRequest(HTTPPayload):
     """Fields of an http request"""
 
@@ -163,7 +163,7 @@ class HTTPRequest(HTTPPayload):
         )
 
 
-@dataclass
+@define
 class HTTPResponse(HTTPPayload):
     """Fields of an http response"""
 

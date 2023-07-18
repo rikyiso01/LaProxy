@@ -8,6 +8,7 @@ authors = ["Riccardo Isola <riky.isola@gmail.com>"]
 python = "^3.8"
 aiotools = "^1.6.1"
 typing-extensions = "^4.7.1"
+attrs = "^23.1.0"
 
 [tool.poetry.group.dev.dependencies]
 httpx = "^0.24.1"
