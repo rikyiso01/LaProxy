@@ -55,7 +55,7 @@ class TCPHandler(Handler, ABC):
                     f"Dropping connection of {ip}:{port}, inbound={inbound}"
                 )
                 break
-            TCPHandler.__logger.debug("Seding packet")
+            TCPHandler.__logger.debug("Sending packet")
             writer.write(packet)
 
     @abstractmethod
@@ -85,6 +85,8 @@ class TCPLineHandler(TCPHandler, ABC):
     def process(self, packet: bytes, inbound: bool, /) -> bytes | None:
         buffer = self.__inbound_buffer if inbound else self.__outbound_buffer
         buffer.extend(packet)
+        if b"\n" not in buffer:
+            TCPLineHandler.__logger.debug("Packet did not contain any new line")
         response = bytearray()
         while (index := buffer.find(b"\n")) != -1:
             content = buffer[: index + 1]
@@ -93,8 +95,6 @@ class TCPLineHandler(TCPHandler, ABC):
             if new is None:
                 return None
             response.extend(new)
-        if not buffer:
-            TCPLineHandler.__logger.debug("Packet did not contain any new line")
         return response
 
     @abstractmethod

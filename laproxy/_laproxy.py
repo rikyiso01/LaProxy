@@ -1,11 +1,13 @@
 from __future__ import annotations
 from asyncio import run, StreamWriter, StreamReader
 from abc import ABC, abstractmethod
-from logging import INFO, basicConfig
+from logging import INFO, basicConfig, getLogger
 
 
 class Proxy(ABC):
     """Abstract base class for a proxy"""
+
+    __logger = getLogger("laproxy.Proxy")
 
     def run(self, *, log_level: int | None = INFO) -> None:
         """Start this proxy.
@@ -13,11 +15,12 @@ class Proxy(ABC):
         Creates an asyncio event loop.
         If an event loop is already running, use run_async()"""
         if log_level is not None:
-            basicConfig(level=INFO)
+            basicConfig(level=log_level)
         try:
+            Proxy.__logger.debug("Starting event loop")
             run(self.run_async())
         except KeyboardInterrupt:
-            pass
+            Proxy.__logger.debug("Keyboard Interrupt received, stopping server")
 
     @abstractmethod
     async def run_async(self) -> None:
