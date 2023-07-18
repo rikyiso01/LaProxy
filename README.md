@@ -2,7 +2,7 @@
 
 ## Introduction
 
-> An easy to use proxy for A/D  
+> An easy to use proxy for A/D CTFs  
 > You can read the documentation at [rikyiso01.github.io/laproxy](https://rikyiso01.github.io/laproxy)
 
 ## Code Samples
