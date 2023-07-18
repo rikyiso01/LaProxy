@@ -2,6 +2,7 @@
 pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     python38
+    python310
     poetry
     docker
     docker-compose

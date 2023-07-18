@@ -2,7 +2,8 @@
 
 ## Introduction
 
-> An easy to use proxy for A/D
+> An easy to use proxy for A/D  
+> You can read the documentation at [rikyiso01.github.io/laproxy](https://rikyiso01.github.io/laproxy)
 
 ## Code Samples
 
@@ -41,6 +42,8 @@
 > if __name__ == "__main__":
 >     TCPProxy("0.0.0.0", 1234, "127.0.0.1", 5005, Handler).run()
 > ```
+>
+> You can find more examples in the samples folder
 
 ## Installation
 
