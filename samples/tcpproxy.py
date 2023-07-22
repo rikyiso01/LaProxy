@@ -1,5 +1,4 @@
 from __future__ import annotations
-from asyncio import open_connection
 from laproxy import TCPProxy, TCPHandler
 
 
