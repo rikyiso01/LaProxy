@@ -6,5 +6,3 @@ services:
       - "1234:1234"
     volumes:
       - ./proxy.py:/app/proxy.py
-    links:
-      - "servicename"
