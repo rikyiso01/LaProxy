@@ -14,6 +14,8 @@ from logging import getLogger
 
 from aiotools import TaskGroup
 
+from ._judge import Judge
+
 DEFAULT_TCP_BUFFSIZE = 1024
 
 
@@ -25,6 +27,9 @@ class TCPHandler(Handler, ABC):
     """Base handler for a tcp connection, useful for TCP packet level processing"""
 
     __logger = getLogger("laproxy.TCPHandler")
+
+    def __init__(self):
+        self.history: list[bytes] = []
 
     def buffsize(self) -> int:
         """Size of the buffer to use for the packet data
@@ -140,14 +145,29 @@ class TCPProxy(Proxy):
         TCPProxy.__logger.info(
             f"Starting the server on {self.__listen_address}:{self.__listen_port}"
         )
+
         server = await start_server(
             self.__thread, self.__listen_address, self.__listen_port
         )
-        async with server:
+
+        async with TaskGroup() as group:
             TCPProxy.__logger.info(
                 f"Forwarding connections to {self.__target_address}:{self.__target_port}"
             )
-            await server.serve_forever()
+            group.create_task(
+                server.serve_forever(), 
+                name="server task",
+            )
+            if hasattr(self.__handler, "judge") and not self.__handler.judge is None:
+                judge: Judge = self.__handler.judge
+                TCPProxy.__logger.info(
+                    f"Judge updater running"
+                )
+                group.create_task(
+                    judge.start_updating(self.__listen_port),
+                    name="update judge",
+                )    
+
 
     async def __thread(self, reader: StreamReader, writer: StreamWriter, /) -> None:
         try:
